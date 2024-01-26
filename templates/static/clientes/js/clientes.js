@@ -36,18 +36,83 @@ function dados_cliente(){
     }).then(function(result){
         return result.json()
     }).then(function(data){
-        document.getElementById('form-att-cliente').style.display = 'block'
+        aux = document.getElementById('form-att-cliente')
+        aux.style.display = 'block'
 
-        nome = document.getElementById('nome')
-        nome.value = data['nome']
+        document.getElementById('nome').value = data['cliente']['nome']
+        
+        id = document.getElementById('id')
+        id.value = data['cliente_id']
+        document.getElementById('sobrenome').value = data['cliente']['sobrenome']
+        
 
-        sobrenome = document.getElementById('sobrenome')
-        sobrenome.value = data['sobrenome']
+        document.getElementById('email').value = data['cliente']['email']
+        
 
-        email = document.getElementById('email')
-        email.value = data['email']
+        document.getElementById('cpf').value = data['cliente']['cpf']
+        
+        div_carros = document.getElementById('carros')
+        div_carros.innerHTML = ""
+        for(i=0; i< data['carros'].length; i++){
+            console.log(data['carros'][i]['fields']['carro'])
+            div_carros.innerHTML += "<form action='/clientes/update_carro/" + data['carros'][i]['id'] + "' method='POST'>\
+            <div class='row'>\
+                <div class='col-md'>\
+                    <input class='form-control' type='text' name='carro' value='" + data['carros'][i]['fields']['carro']+"'>\
+                </div>\
+                <div class='col-md'>\
+                    <input class='form-control' type='text' name='placa' value='" + data['carros'][i]['fields']['placa']+"'>\
+                </div>\
+                <div class='col-md'>\
+                    <input class='form-control' type='text' name='ano' value='" + data['carros'][i]['fields']['ano']+"'>\
+                </div>\
+                <div class='col-md'>\
+                    <input class='btn btn-success' type='submit' value='salvar'>\
+                </div>\
+                </form>\
+                <div class='col-md'>\
+                    <a class='btn btn-danger' href='/clientes/excluir_carro/"+data['carros'][i]['id']+"'>EXCLUIR</a>\
+                </div>\
+            </div> <br>"
+        }
+    })
+}
 
-        cpf = document.getElementById('cpf')
-        cpf.value = data['cpf']
+function update_cliente(){
+    nome = document.getElementById('nome').value
+    sobrenome = document.getElementById('sobrenome').value
+    email = document.getElementById('email').value
+    cpf = document.getElementById('cpf').value
+    id = document.getElementById('id').value
+
+    fetch('/clientes/update_cliente/'+id,{
+        method: 'POST',
+        headers:{
+            'X-CSRFToken': csrf_token
+        },
+        body: JSON.stringify({
+            nome: nome,
+            sobrenome: sobrenome,
+            email: email,
+            cpf: cpf
+        })
+    }).then(function(result){
+        return result.json()
+    }).then(function(data){
+
+        if(data['status']=='200'){
+            nome = data['nome']
+            sobrenome = data['sobrenome']
+            email = data['email']
+            cpf = data['cpf']
+
+        }else{
+            alert('Dados invalidos')
+        }
+        if(data['status'] =='500'){
+            alert('Carro ja existe')
+        }else{
+            console.log('Tudo certo')
+        }
     })
 }
